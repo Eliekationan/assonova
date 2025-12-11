@@ -62,9 +62,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(Role::class);
     }
-    public function sections(): HasMany
+    // public function sections(): HasMany
+    // {
+    //     return $this->hasMany(App\Model\Section::class);
+    // }
+
+    public function associations()
     {
-        return $this->hasMany(App\Model\Section::class);
+        return $this->belongsToMany(Association::class, 'association_user')
+            ->withPivot(['section_id', 'role', 'is_admin'])
+            ->withTimestamps();
     }
 
 }

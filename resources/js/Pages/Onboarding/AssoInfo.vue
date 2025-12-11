@@ -1,132 +1,150 @@
 <template>
-    <OnboardingLayout
+  <OnboardingLayout
     :title="'Informations sur l\'association'"
     :subtitle="'Pouvons-nous en savoir plus sur votre association'"
-    >
-        <div class="form-box">
+  >
+    <div class="form-box">
 
+      <transition name="fade">
+        <p v-if="displayedText" class="question-text">
+          {{ displayedText }}
+        </p>
+      </transition>
 
-          <!-- STEP INDICATOR -->
-          <!-- <div class="stepper">
-            <div
-              v-for="(s, idx) in steps"
-              :key="idx"
-              class="step"
-              :class="{ active: idx === currentStep }"
-            >
-              {{ idx + 1 }}
-            </div>
-          </div> -->
+      <div class="input-wrapper">
+        <!-- Step 1 -->
+        <template v-if="currentStep === 0">
+          <input
+          required
+            type="text"
+            v-model="form.name"
+            @keyup.enter="nextStep"
+            placeholder="Ex : Association Jeunesse Active"
+          />
+          <p v-if="errors.name" class="error">{{ errors.name }}</p>
+        </template>
 
-          <!-- QUESTION ANIMÉE -->
-          <transition name="fade">
-            <p v-if="displayedText" class="question-text">
-              {{ displayedText }}
-            </p>
-          </transition>
+        <!-- Step 2 -->
+         <template v-if="currentStep === 1">
+            <input
+            required
+            type="text"
+            v-model="form.acronym"
+            @keyup.enter="nextStep"
+            placeholder="AJUPE"
+          />
+          <p v-if="errors.acronym" class="error">{{ errors.acronym }}</p>
+          <p v-if="errors.acronym" class="error">{{ errors.acronym }}</p>
+        </template>
 
-          <!-- INPUTS PAR ETAPE -->
-          <div class="input-wrapper">
+        <template v-if="currentStep === 2">
+            <input
+            required
+            type="text"
+            v-model="form.object"
+            @keyup.enter="nextStep"
+            placeholder="Unir pour la Jeunesse"
+          />
+          <p v-if="errors.object" class="error">{{ errors.object }}</p>
+          <p v-if="errors.object" class="error">{{ errors.object }}</p>
+        </template>
 
-            <!-- Step 1 -->
-            <template v-if="currentStep === 0">
-              <input
-                type="text"
-                v-model="form.nom"
-                @keyup.enter="nextStep"
-                placeholder="Ex : Association Jeunesse Active"
-              />
-            </template>
+        <template v-if="currentStep === 3">
+            <input
+            required
+            type="text"
+            v-model="form.description"
+            @keyup.enter="nextStep"
+            placeholder=""
+          />
+          <p v-if="errors.description" class="error">{{ errors.description }}</p>
+          <p v-if="errors.description" class="error">{{ errors.description }}</p>
+        </template>
 
-            <!-- Step 2 -->
-            <template v-if="currentStep === 1">
-              <select v-model="form.type" @change="nextStep">
-                <option disabled value="">Sélectionnez...</option>
-                <option value="humanitaire">Humanitaire</option>
-                <option value="sportive">Sportive</option>
-                <option value="religieuse">Religieuse</option>
-                <option value="autre">Autre</option>
-              </select>
-            </template>
+        <!-- Step 3 -->
+        <template v-if="currentStep === 4">
+          <input
+            type="email"
+            v-model="form.email"
+            @keyup.enter="nextStep"
+            placeholder="info@association.com"
+          />
+          <p v-if="errors.email" class="error">{{ errors.email }}</p>
+        </template>
 
-            <!-- Step 3 -->
-            <template v-if="currentStep === 2">
-              <input
-                type="text"
-                v-model="form.adresse"
-                @keyup.enter="nextStep"
-                placeholder="Ex : Abidjan, Yopougon..."
-              />
-            </template>
+        <!-- Step 3 -->
+        <template v-if="currentStep === 5">
+          <input
+            type="text"
+            v-model="form.phone"
+            @keyup.enter="nextStep"
+            placeholder="Ex : +225 01 02 03 04"
+          />
+          <p v-if="errors.phone" class="error">{{ errors.phone }}</p>
+        </template>
 
-            <!-- Step 4 : Récap -->
-            <template v-if="currentStep === 3">
-              <div class="confirmation-box">
-                <p>
-                    Vous avez dit que le nom de votre association est : <strong>
-                        <b>{{ form.nom }}</b>
-                    </strong>
-                </p>
-                <p>
-                    Vous avez selectionné <strong><b>{{ form.type }}</b> </strong>
-                    comme type d'association
-                 </p>
-                <p>
-                    L'adresse de votre association est :
-                    <strong><b>{{ form.adresse }}</b></strong>
-                </p>
-              </div>
-            </template>
-          </div>
+        <template v-if="currentStep === 6">
+          <input
+            type="text"
+            v-model="form.siege"
+            @keyup.enter="nextStep"
+            placeholder="Abidjan"
+          />
+          <p v-if="errors.siege" class="error">{{ errors.siege }}</p>
+        </template>
+      </div>
 
-          <!-- BUTTONS -->
-          <div class="actions">
-            <button v-if="currentStep > 0"
-                    class="btn-secondary"
-                    @click="prevStep">
-              Retour
-            </button>
+      <!-- BUTTONS -->
+      <div class="actions">
+        <button v-if="currentStep > 0"
+                class="btn-secondary"
+                @click="prevStep">
+          Retour
+        </button>
 
-            <button v-if="currentStep < steps.length - 1"
-                    class="btn-primary"
-                    @click="nextStep">
-              Suivant
-            </button>
+        <button v-if="currentStep < steps.length - 1"
+                class="btn-primary"
+                @click="nextStep">
+          Suivant
+        </button>
 
-            <button v-if="currentStep === steps.length - 1"
-                    class="btn-primary"
-                    @click="$emit('next')">
-              Etape Suivante
-            </button>
-          </div>
+        <button v-if="currentStep === steps.length - 1"
+                class="btn-primary"
+                :disabled="processing"
+                @click="$emit('next')">
+          <span v-if="processing">Envoi...</span>
+          <span v-else>Etape Suivante</span>
+        </button>
+      </div>
 
-        </div>
-      <!-- <div class="onboarding-page">
-      </div> -->
-    </OnboardingLayout>
+    </div>
+  </OnboardingLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import OnboardingLayout from "../../Layouts/OnboardinLayout.vue";
 
 const props = defineProps({
   form: Object,
+  errors: Object,
+  processing: Boolean
 });
 
-const emit = defineEmits(["next", "prev"]);
+const emit = defineEmits(["next", "prev", "field-changed"]);
 
-// STEP SYSTEM
 const currentStep = ref(0);
 
 const steps = [
   "Quel est le nom de votre association ?",
-  "Quel est le type de votre association ?",
-  "Où est située votre association ?",
-//   "Récapitulatif",
+  "Quel est L'acronyme de votre association ?",
+  "Quel est l'objet ou mission de votre association ?",
+  "Comment decrivez-vous votre association ?",
+  "Quel est l'email de votre association ?",
+  "Quel est le téléphone de votre association ?",
+  "Où se situe le siège de votre association ?",
 ];
 
-// === EFFET D'ÉCRITURE ======================
 const displayedText = ref("");
 let typingIndex = 0;
 let typingInterval = null;
@@ -134,7 +152,6 @@ let typingInterval = null;
 function startTyping() {
   displayedText.value = "";
   typingIndex = 0;
-
   clearInterval(typingInterval);
 
   const text = steps[currentStep.value];
@@ -151,132 +168,61 @@ function startTyping() {
 
 onMounted(() => startTyping());
 
-// === NAVIGATION ============================
+watch(currentStep, () => startTyping());
+
+// Navigation
 function nextStep() {
-  if (currentStep.value < steps.length - 1) {
-    currentStep.value++;
-    startTyping();
-  }
+    if (!isStepValid()) return;
+    if (currentStep.value < steps.length - 1) {
+        currentStep.value++;
+    }
 }
 
+const isStepValid = () => {
+    switch(currentStep.value) {
+      case 0: // AssociationInfo
+        if (!props.form.name) {
+          alert("Le nom de l'association est requis !");
+          return false;
+        }
+        return true;
+
+        case 3:
+            if (!props.form.description) {
+                alert("La description de votre association est requise !");
+                return false;
+            }
+
+
+        return true;
+        case 4:
+            if (!props.form.email) {
+                alert("L'email de votre association est requis!");
+                return false;
+            }
+            return true
+        case 4:
+            if (!props.form.email) {
+                alert("Le contact téléphonique de votre association est requis!");
+                return false;
+            }
+            return true
+      default:
+        return true;
+    }
+  }
 function prevStep() {
   if (currentStep.value > 0) {
     currentStep.value--;
-    startTyping();
   }
+}
+
+// Émet l’event pour auto-save
+function onFieldChanged(field) {
+  emit("field-changed", field);
 }
 </script>
 
 <style scoped>
-.form-box {
-  text-align: center;
-  color: white;
-  max-width: 500px;
-}
-.title {
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 25px;
-  color: #feff40;
-  font-size: larger;
-  font-weight: bolder;
-}
-
-.stepper {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.step {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #e6e6e6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: .3s;
-  font-weight: bold;
-}
-
-.step.active {
-  background: #1c6279;
-  color: white;
-}
-
-.question-text {
-  font-size: 30px;
-  font-weight: 600;
-  margin-bottom: 15px;
-  min-height: 40px;
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s ease;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-p{
-    padding: 25px;
-}
-
-input,
-select {
-  width: 100%;
-  padding: 14px;
-  margin-top: 10px;
-  border-radius: 6px;
-  border: 1px solid #cccccc;
-  font-size: 16px;
-  color: black;
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 25px;
-}
-
-.btn-primary {
-  background: #1c6279;
-  color: white;
-  padding: 10px 22px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: large;
-}
-.btn-primary:hover {
-  background: #174f62;
-}
-
-.btn-secondary {
-  background: #cccccc;
-  padding: 10px 22px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: large;
-}
-.btn-secondary:hover {
-  background: #b7b7b7;
-}
-
-.confirmation-box {
-  /* background: #f8f8f8; */
-  padding: 15px;
-  border-radius: 6px;
-  text-align: start;
-}
-.onboarding-page {
-  width: 100%;
-  /* min-height: 100vh; */
-  background: #1c6279; /* Bleu profond Assonova */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
+.error { color: #ffb3b3; margin-top: 6px; font-size: 14px; }
 </style>

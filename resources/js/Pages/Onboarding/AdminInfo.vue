@@ -1,32 +1,80 @@
 <template>
-  <OnboardingLayout :title="'Informations de l\'administrateur principal'">
-    <div class="form-box">
-      <h2>Informations de l'administrateur principal</h2>
+    <OnboardingLayout :title="'Informations de l\'administrateur principal'">
+        <div class="form-box">
+            <h2>Informations de l'administrateur principal</h2>
 
-      <label>Nom complet</label>
-      <input type="text" v-model="form.nom_dirigeant" />
+            <label>Nom complet</label>
+            <input
+                type="text"
+                v-model="form.admin_name"
+            />
+            <p v-if="errors.admin_name" class="error">{{ errors.admin_name }}</p>
 
-      <label>Téléphone</label>
-      <input type="text" v-model="form.telephone_dirigeant" />
+            <label>Email</label>
+            <input
+                type="text"
+                v-model="form.admin_email"
+                @input="consologuer()"
+            />
+            <p v-if="errors.admin_email" class="error">{{ errors.admin_email }}</p>
 
-      <!-- <label>Mot de passe</label>
-      <input type="password" v-model="form.password" /> -->
+            <label>Téléphone</label>
+            <PhoneInput
+                v-model="form.admin_phone"
+            />
+            <p v-if="errors.admin_phone" class="error">{{ errors.admin_phone }}</p>
 
-      <div class="actions">
-        <button class="btn-secondary" @click="$emit('prev')">Retour</button>
-        <button class="btn-primary" @click="$emit('next')">Suivant</button>
-      </div>
-    </div>
-  </OnboardingLayout>
+            <label>Password</label>
+            <input type="password"
+                v-model="form.password"
+            />
+            <p v-if="errors.password" class="error">{{ errors.password }}</p>
+
+            <div class="actions">
+                <button class="btn-secondary" @click="$emit('prev')">Retour</button>
+                <button
+                    class="btn-primary"
+                    :disabled="processing"
+                    @click="submit"
+                >
+                    <span v-if="processing">Envoi...</span>
+                    <span v-else>Terminer</span>
+                </button>
+            </div>
+        </div>
+    </OnboardingLayout>
 </template>
 
-<script>
+<script setup>
 import OnboardingLayout from "../../Layouts/OnboardinLayout.vue";
+import PhoneInput from "@/Components/PhoneInput.vue";
+import { reactive, watch } from 'vue';
 
-export default {
-  components: { OnboardingLayout },
-  props: ["form"]
-};
+const props = defineProps({
+    form: Object,
+    errors: Object,
+    processing: Boolean
+});
+
+const emit = defineEmits(["prev", "field-changed"]);
+
+
+
+// // Synchroniser les modifications avec le parent si nécessaire
+// watch(form, (newVal) => {
+//     emit('field-changed', newVal);
+// }, { deep: true });
+
+// Fonction d'envoi
+function submit() {
+    props.form.post('/onboarding/store', {
+        onSuccess: () => {
+            console.log("Formulaire envoyé !");
+            // tu peux ajouter une redirection si besoin
+        }
+    });
+}
+
 </script>
 
 <style>
@@ -127,19 +175,21 @@ select {
 }
 
 .confirmation-box {
-  /* background: #f8f8f8; */
   padding: 15px;
   border-radius: 6px;
   text-align: start;
 }
 .onboarding-page {
   width: 100%;
-  /* min-height: 100vh; */
   background: #1c6279; /* Bleu profond Assonova */
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
 }
-/* Même CSS que AssociationInfo (donc tu peux mutualiser si tu veux) */
+.error {
+  color: #ffb3b3;
+  margin-top: 6px;
+  font-size: 14px;
+}
 </style>

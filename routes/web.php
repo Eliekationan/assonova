@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MembreController;
 use App\Http\Controllers\CotisationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\OnBoardingController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,6 +23,10 @@ Route::get('/', function () {
 Route::get("/register-association", function(){
     return Inertia::render('Onboarding/AssoInfo');
 });
+
+Route::post('/onboarding/store', [OnboardingController::class, 'store']);
+// Route::post("/register-association", [ProfileController::class, 'storeOnboarding']);
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
